@@ -1,0 +1,12 @@
+{
+  "$schema": "https://openapi.vercel.sh/vercel.json",
+  "framework": "vite",
+  "buildCommand": "npm run build",
+  "outputDirectory": "dist",
+  "functions": { "api/page.ts": { "includeFiles": "dist/index.html" } },
+  "rewrites": [
+    { "source": "/", "destination": "/api/page" },
+    { "source": "/index.html", "destination": "/api/page" }
+  ],
+  "headers": [ { "source": "/(.*)", "headers": [ { "key": "Referrer-Policy", "value": "no-referrer" } ] } ]
+}
