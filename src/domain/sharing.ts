@@ -1,29 +1,66 @@
-// Deliberately accepts no report or answers: all outbound content is static.
-export const shareCardLines = ['당신의 신앙점수는 몇 점입니까?', '내 점수를 조회하고 나서야,', '더 중요한 질문을 발견했습니다.', '은혜는 점수로 얻을 수 없습니다.'] as const;
+export interface SharedResult {
+  score: number;
+  name: string;
+}
+export const siteDescription = "12개의 질문, 나의 신앙활동은 몇 점일까요?";
+export function normalizeShareName(value: string): string {
+  return Array.from(
+    value
+      .normalize("NFC")
+      .replace(/[^\p{L}\p{M}\p{N} ._-]/gu, "")
+      .replace(/\s+/g, " ")
+      .trim(),
+  )
+    .slice(0, 20)
+    .join("");
+}
+export function parseSharedResult(search: string): SharedResult | null {
+  const params = new URLSearchParams(search);
+  const raw = params.get("score");
+  if (
+    params.getAll("score").length !== 1 ||
+    params.getAll("name").length > 1 ||
+    !raw ||
+    !/^[1-9]\d{0,3}$/.test(raw)
+  )
+    return null;
+  const score = Number(raw);
+  if (score > 1000) return null;
+  return { score, name: normalizeShareName(params.get("name") ?? "") };
+}
 export function publicShareUrl(current: string): string {
   const url = new URL(current);
-  return `${url.origin}${url.pathname}`;
+  return `${url.origin}/`;
 }
-export function sharePayload(current: string): ShareData {
-  return { title: 'NICE FAITH', text: '내 점수를 조회하고 나서야, 더 중요한 질문을 발견했습니다.', url: publicShareUrl(current) };
+export function resultShareUrl(current: string, result: SharedResult): string {
+  if (
+    !Number.isInteger(result.score) ||
+    result.score < 1 ||
+    result.score > 1000
+  )
+    throw new RangeError("공유 점수 범위는 1~1,000입니다.");
+  const url = new URL(publicShareUrl(current));
+  url.searchParams.set("score", String(result.score));
+  const name = normalizeShareName(result.name);
+  if (name) url.searchParams.set("name", name);
+  return url.toString();
 }
-export async function downloadShareCard(): Promise<void> {
-  await document.fonts?.ready;
-  const canvas = document.createElement('canvas');
-  canvas.width = 1080; canvas.height = 1350;
-  const context = canvas.getContext('2d');
-  if (!context) throw new Error('이미지 저장을 지원하지 않는 브라우저입니다.');
-  context.fillStyle = '#F7F4EB'; context.fillRect(0, 0, 1080, 1350);
-  context.fillStyle = '#615C52'; context.font = 'bold 25px sans-serif'; context.fillText('NICE FAITH LAB', 90, 120);
-  context.fillStyle = '#292720'; context.font = 'bold 52px sans-serif';
-  context.fillText('당신의 신앙점수는', 90, 340); context.fillText('몇 점입니까?', 90, 420);
-  context.font = '34px sans-serif'; context.fillText(shareCardLines[1], 90, 590); context.fillText(shareCardLines[2], 90, 650);
-  context.strokeStyle = '#D9D2C5'; context.beginPath(); context.moveTo(90, 790); context.lineTo(990, 790); context.stroke();
-  context.font = 'bold 43px serif'; context.fillText(shareCardLines[3], 90, 930);
-  context.fillStyle = '#615C52'; context.font = '25px sans-serif'; context.fillText('독립 교육용 패러디 · 실제 신앙을 평가하지 않습니다.', 90, 1230);
-  const blob = await new Promise<Blob>((resolve, reject) => canvas.toBlob(value => value ? resolve(value) : reject(new Error('이미지를 만들지 못했습니다.')), 'image/png'));
-  const url = URL.createObjectURL(blob);
-  const anchor = document.createElement('a'); anchor.href = url; anchor.download = 'nice-faith-reflection.png';
-  document.body.append(anchor); anchor.click(); anchor.remove();
-  window.setTimeout(() => URL.revokeObjectURL(url), 1000);
+export function resultTitle(result: SharedResult): string {
+  return `${result.name ? `${result.name}님의` : "나의"} 신앙활동 점수는 ${result.score.toLocaleString("ko-KR")}점!`;
+}
+export function sharePayload(
+  current: string,
+  result?: SharedResult,
+): ShareData {
+  return result
+    ? {
+        title: resultTitle(result),
+        text: "나는 몇 점일까? 내 신앙활동 점수도 확인해 보세요.",
+        url: resultShareUrl(current, result),
+      }
+    : {
+        title: "NICE FAITH — 당신의 믿음, 몇 점입니까?",
+        text: siteDescription,
+        url: publicShareUrl(current),
+      };
 }

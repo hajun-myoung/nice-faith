@@ -8,5 +8,10 @@
     { "source": "/", "destination": "/api/page" },
     { "source": "/index.html", "destination": "/api/page" }
   ],
-  "headers": [ { "source": "/(.*)", "headers": [ { "key": "Referrer-Policy", "value": "no-referrer" } ] } ]
+  "headers": [
+    {
+      "source": "/(.*)",
+      "headers": [{ "key": "Referrer-Policy", "value": "no-referrer" }]
+    }
+  ]
 }
