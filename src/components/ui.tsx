@@ -34,15 +34,22 @@ export function Disclaimer() {
   return (
     <footer class="disclaimer">
       <ShieldCheck size={16} aria-hidden="true" />
-      <p>
-        NICE FAITH LAB · 독립 교육용 패러디
-        <br />
-        실제 NICE 신용평가사와 관련이 없습니다.
-        <br />
-        실제 신앙이나 구원의 상태를 판단하지 않습니다.
-        <br />
-        응답은 이 브라우저 메모리에만 보관됩니다.
-      </p>
+      <div class="footer-info">
+        <p>
+          NICE FAITH LAB · 교육용 패러디이며, 실제 NICE 신용평가사와 관련이
+          없습니다
+        </p>
+        <p>
+          실제 신앙이나 구원의 상태를 판단하지 않으며, 응답은 이 브라우저
+          메모리에만 보관됩니다
+        </p>
+        <p>
+          Author 높은뜻정의교회, 청년 명하준 · 기독교(개신교, 카톨릭) 관련 웹,
+          앱개발, 프로젝트 제의는{" "}
+          <a href="mailto:fe.dev.denver@gmail.com">fe.dev.denver@gmail.com</a>{" "}
+          으로 부탁드립니다 (이단 · 사이비는 사절합니다)
+        </p>
+      </div>
     </footer>
   );
 }
