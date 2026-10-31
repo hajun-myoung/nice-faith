@@ -55,7 +55,7 @@ export function sharePayload(
   return result
     ? {
         title: resultTitle(result),
-        text: "나는 몇 점일까? 내 신앙활동 점수도 확인해 보세요.",
+        text: `${normalizeShareName(result.name) ? `${normalizeShareName(result.name)}님의` : "나의"} 신앙 점수는 ${result.score.toLocaleString("ko-KR")}점! 나는 몇 점일까? 내 신앙활동 점수도 확인해 보세요. 숨겨진 의미도 있으니 꼭 확인해 보세요!`,
         url: resultShareUrl(current, result),
       }
     : {

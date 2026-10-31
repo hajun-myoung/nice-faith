@@ -55,7 +55,13 @@ export default function QuestionnaireScreen(props: {
   return (
     <div class="question-screen">
       <div class="flex justify-between mini-label">
-        <span>나의 신앙활동 돌아보기</span>
+        <span>
+          {question().scored
+            ? domainDefinitions.find(
+                (domain) => domain.id === question().domain,
+              )?.label
+            : "조금 더 깊은 질문"}
+        </span>
         <span>{props.question} / 12</span>
       </div>
       <progress
@@ -65,19 +71,12 @@ export default function QuestionnaireScreen(props: {
         max={12}
       />
       <div class="question-body">
-        <p class="eyebrow">
-          {question().scored
-            ? domainDefinitions.find(
-                (domain) => domain.id === question().domain,
-              )?.label
-            : "조금 더 깊은 질문"}
-        </p>
         <fieldset>
           <legend>
             <h1 tabIndex={-1}>{question().prompt}</h1>
           </legend>
           <p class="muted question-note">
-            {question().description ?? "지금의 모습에 가까운 답을 골라주세요."}{" "}
+            {question().description}{" "}
             {props.question < 12
               ? "선택하면 다음 질문으로 이동합니다."
               : "선택 후 결과 확인하기를 눌러주세요."}
@@ -124,10 +123,7 @@ export default function QuestionnaireScreen(props: {
       <p class="sr-only" role="status">
         {advancing() ? "답변을 선택했습니다. 다음 질문으로 이동합니다." : ""}
       </p>
-      <div
-        class="question-actions"
-        classList={{ "last-question": props.question === 12 }}
-      >
+      <div class="question-actions">
         <button
           class="button previous-button"
           onClick={() => move(props.question - 1)}

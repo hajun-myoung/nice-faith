@@ -1,5 +1,10 @@
-import { For, Show } from "solid-js";
-import { ArrowUpRight, ArrowDownRight, CircleCheck } from "lucide-solid";
+import { For, Show, createSignal, createUniqueId } from "solid-js";
+import {
+  ArrowUpRight,
+  ArrowDownRight,
+  CircleCheck,
+  Share2,
+} from "lucide-solid";
 import type { FaithReport, ScoreFactor } from "../domain/types";
 import { Bar, PrimaryButton } from "../components/ui";
 import ShareControls from "../components/ShareControls";
@@ -32,6 +37,8 @@ export default function ResultReportScreen(props: {
   onRevise: () => void;
   onRestart: () => void;
 }) {
+  const [shareOpen, setShareOpen] = createSignal(false);
+  const sharePanelId = createUniqueId();
   return (
     <div class="report">
       <div class="report-status">
@@ -67,10 +74,22 @@ export default function ResultReportScreen(props: {
           이 점수의 의미 확인하기
         </PrimaryButton>
       </section>
-      <details class="score-share card">
-        <summary>내 점수 공유하기</summary>
+      <button
+        type="button"
+        class="button secondary report-share-button"
+        aria-expanded={shareOpen()}
+        aria-controls={sharePanelId}
+        onClick={() => setShareOpen((open) => !open)}
+      >
+        <Share2 size={18} aria-hidden="true" /> 내 점수 공유하기
+      </button>
+      <div
+        id={sharePanelId}
+        class="card score-share-panel"
+        hidden={!shareOpen()}
+      >
         <ShareControls score={props.report.score} />
-      </details>
+      </div>
       <details class="report-details">
         <summary>활동 분석 · 상세 리포트 펼치기</summary>
         <section class="card">

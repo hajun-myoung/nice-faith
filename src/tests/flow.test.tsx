@@ -4,6 +4,7 @@ import App from "../app/App";
 import RevealScreen, { revealTiming } from "../screens/RevealScreen";
 import EvaluationScreen from "../screens/EvaluationScreen";
 import { buildFaithReport } from "../domain/scoring";
+import ResultReportScreen from "../screens/ResultReportScreen";
 import { parseRoute } from "../app/navigation";
 const click = (name: string) =>
   fireEvent.click(screen.getByRole("button", { name }));
@@ -182,4 +183,30 @@ it("shows the shared result first and removes incoming score when starting our o
   expect(location.search).toBe("");
   expect(document.title).toBe("NICE FAITH — 당신의 믿음, 몇 점입니까?");
   expect(screen.getByRole("radio", { name: "4회" })).toBeTruthy();
+});
+
+it("opens sharing from a secondary button while keeping activity details collapsed", async () => {
+  const { container } = render(() => (
+    <ResultReportScreen
+      report={buildFaithReport({ 1: 0 })!}
+      onReveal={() => {}}
+      onRevise={() => {}}
+      onRestart={() => {}}
+    />
+  ));
+  const button = screen.getByRole("button", { name: "내 점수 공유하기" });
+  const panel = document.getElementById(button.getAttribute("aria-controls")!)!;
+  expect(button.classList.contains("secondary")).toBe(true);
+  expect(button.closest("details")).toBeNull();
+  expect(button.getAttribute("aria-expanded")).toBe("false");
+  expect(panel.hidden).toBe(true);
+  await fireEvent.click(button);
+  expect(panel.hidden).toBe(false);
+  expect(button.getAttribute("aria-expanded")).toBe("true");
+  expect(screen.getByRole("textbox", { name: /공유 이름/ })).toBeTruthy();
+  expect(
+    container.querySelector<HTMLDetailsElement>(".report-details")?.open,
+  ).toBe(false);
+  await fireEvent.click(button);
+  expect(panel.hidden).toBe(true);
 });

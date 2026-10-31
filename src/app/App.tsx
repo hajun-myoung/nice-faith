@@ -82,6 +82,7 @@ export default function App() {
       classList={{
         "warm-shell": warm(),
         "revealing-shell": route().view === "reveal",
+        "questionnaire-shell": route().view === "questionnaire",
       }}
     >
       <a
@@ -95,10 +96,12 @@ export default function App() {
         본문으로 바로가기
       </a>
       <div class="app-column">
-        <header class="app-header">
-          <Brand />
-          <span class="lab-label">LAB</span>
-        </header>
+        <Show when={route().view !== "questionnaire"}>
+          <header class="app-header">
+            <Brand />
+            <span class="lab-label">LAB</span>
+          </header>
+        </Show>
         <main id="main-content" tabIndex={-1}>
           <Switch>
             <Match when={route().view === "shared"}>

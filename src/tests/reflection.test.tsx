@@ -81,9 +81,7 @@ describe("reflection and sharing", () => {
     expect(screen.getByRole("heading", { name: "측정 불가" })).toBeTruthy();
     expect(screen.getByText(reflectionFor({ 12: 0 }).primary)).toBeTruthy();
     expect(container.querySelector('.score,.grade,[role="meter"]')).toBeNull();
-    expect(
-      screen.getByRole("button", { name: "내 점수 공유하기" }),
-    ).toBeTruthy();
+    expect(screen.getByRole("button", { name: "공유하기" })).toBeTruthy();
   });
   it("copies score/name but no answers, with a manual fallback if denied", async () => {
     const writeText = vi.fn().mockRejectedValue(new Error("denied"));
@@ -119,9 +117,7 @@ describe("reflection and sharing", () => {
       value: { writeText },
     });
     render(() => <ShareControls score={730} />);
-    await fireEvent.click(
-      screen.getByRole("button", { name: "내 점수 공유하기" }),
-    );
+    await fireEvent.click(screen.getByRole("button", { name: "공유하기" }));
     expect(share).toHaveBeenCalledWith(
       sharePayload(location.href, { score: 730, name: "" }),
     );
@@ -137,4 +133,65 @@ describe("reflection and sharing", () => {
       screen.getByRole("button", { name: "테스트 공유하기" }),
     ).toBeTruthy();
   });
+});
+
+it("includes the chosen name, score and invitation in the share message", () => {
+  const named = sharePayload("https://faith.example/", {
+    score: 730,
+    name: "명하준",
+  });
+  expect(named.text).toBe(
+    "명하준님의 신앙 점수는 730점! 나는 몇 점일까? 내 신앙활동 점수도 확인해 보세요. 숨겨진 의미도 있으니 꼭 확인해 보세요!",
+  );
+  expect(
+    sharePayload("https://faith.example/", { score: 730, name: "" }).text,
+  ).toMatch(/^나의 신앙 점수는 730점!/);
+  expect(
+    sharePayload("https://faith.example/", { score: 730, name: "<하준>" }).text,
+  ).toMatch(/^하준님의/);
+});
+it("copies the personalized invitation and link when native sharing is unavailable", async () => {
+  Object.defineProperty(navigator, "share", {
+    configurable: true,
+    value: undefined,
+  });
+  const writeText = vi.fn().mockResolvedValue(undefined);
+  Object.defineProperty(navigator, "clipboard", {
+    configurable: true,
+    value: { writeText },
+  });
+  history.replaceState(null, "", "/?answers=secret#/reflection");
+  render(() => <ShareControls score={730} />);
+  fireEvent.input(screen.getByRole("textbox", { name: /공유 이름/ }), {
+    target: { value: "하준" },
+  });
+  await fireEvent.click(screen.getByRole("button", { name: "공유하기" }));
+  const copied = writeText.mock.calls[0][0] as string;
+  expect(copied).toContain("하준님의 신앙 점수는 730점!");
+  expect(copied).toContain("숨겨진 의미도 있으니 꼭 확인해 보세요!");
+  expect(copied).toContain(`${location.origin}/?score=730&name=`);
+  expect(copied).not.toContain("secret");
+  expect(screen.getByRole("status").textContent).toContain(
+    "메시지와 주소를 복사",
+  );
+  delete (navigator as Partial<Navigator>).share;
+});
+it("offers a selectable personalized message if both sharing and clipboard access fail", async () => {
+  Object.defineProperty(navigator, "share", {
+    configurable: true,
+    value: vi.fn().mockRejectedValue(new Error("unavailable")),
+  });
+  Object.defineProperty(navigator, "clipboard", {
+    configurable: true,
+    value: { writeText: vi.fn().mockRejectedValue(new Error("denied")) },
+  });
+  render(() => <ShareControls score={730} />);
+  await fireEvent.click(screen.getByRole("button", { name: "공유하기" }));
+  const message = (await screen.findByRole("textbox", {
+    name: "공유 메시지",
+  })) as HTMLTextAreaElement;
+  expect(message.value).toContain("나의 신앙 점수는 730점!");
+  expect(message.value).toContain(`${location.origin}/?score=730`);
+  expect(message.readOnly).toBe(true);
+  delete (navigator as Partial<Navigator>).share;
 });

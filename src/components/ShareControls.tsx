@@ -4,7 +4,10 @@ import { sharePayload } from "../domain/sharing";
 export default function ShareControls(props: { score?: number }) {
   const [name, setName] = createSignal("");
   const [status, setStatus] = createSignal("");
-  const [manualUrl, setManualUrl] = createSignal("");
+  const [manualCopy, setManualCopy] = createSignal<{
+    text: string;
+    withMessage: boolean;
+  }>();
   const [busy, setBusy] = createSignal(false);
   const payload = () =>
     sharePayload(
@@ -13,15 +16,24 @@ export default function ShareControls(props: { score?: number }) {
         ? undefined
         : { score: props.score, name: name() },
     );
-  const copy = async () => {
-    const url = payload().url!;
+  const copy = async (withMessage: boolean) => {
+    const data = payload();
+    const text = withMessage ? `${data.text}\n\n${data.url}` : data.url!;
     try {
-      await navigator.clipboard.writeText(url);
-      setManualUrl("");
-      setStatus("공유 주소를 복사했습니다.");
+      await navigator.clipboard.writeText(text);
+      setManualCopy(undefined);
+      setStatus(
+        withMessage
+          ? "공유 메시지와 주소를 복사했습니다. 카카오톡에 붙여 넣어 주세요."
+          : "공유 주소를 복사했습니다.",
+      );
     } catch {
-      setManualUrl(url);
-      setStatus("아래 주소를 선택해 직접 복사해 주세요.");
+      setManualCopy({ text, withMessage });
+      setStatus(
+        withMessage
+          ? "아래 메시지와 주소를 선택해 직접 복사해 주세요."
+          : "아래 주소를 선택해 직접 복사해 주세요.",
+      );
     }
   };
   const share = async () => {
@@ -29,14 +41,14 @@ export default function ShareControls(props: { score?: number }) {
     setBusy(true);
     try {
       if (!navigator.share) {
-        await copy();
+        await copy(true);
         return;
       }
       await navigator.share(payload());
       setStatus("공유를 완료했습니다.");
     } catch (error) {
       if (!(error instanceof DOMException && error.name === "AbortError"))
-        await copy();
+        await copy(true);
     } finally {
       setBusy(false);
     }
@@ -52,7 +64,7 @@ export default function ShareControls(props: { score?: number }) {
             value={name()}
             onInput={(event) => {
               setName(event.currentTarget.value);
-              setManualUrl("");
+              setManualCopy(undefined);
               setStatus("");
             }}
             placeholder="이름 없이 공유해도 괜찮아요"
@@ -65,27 +77,50 @@ export default function ShareControls(props: { score?: number }) {
         </p>
       </Show>
       <div class="share-actions">
-        <button class="button primary" disabled={busy()} onClick={share}>
+        <button
+          type="button"
+          class="button primary"
+          disabled={busy()}
+          onClick={share}
+        >
           <Share2 size={17} aria-hidden="true" />
-          {props.score === undefined ? "테스트 공유하기" : "내 점수 공유하기"}
+          {props.score === undefined ? "테스트 공유하기" : "공유하기"}
         </button>
-        <button class="button secondary" onClick={copy}>
+        <button
+          type="button"
+          class="button secondary"
+          onClick={() => copy(false)}
+        >
           <Link size={17} aria-hidden="true" /> 주소 복사
         </button>
       </div>
       <p class="micro" role="status">
         {status()}
       </p>
-      <Show when={manualUrl()}>
-        <label class="manual-url">
-          공유 주소
-          <input
-            type="url"
-            readonly
-            value={manualUrl()}
-            onFocus={(event) => event.currentTarget.select()}
-          />
-        </label>
+      <Show when={manualCopy()}>
+        {(value) => (
+          <label class="manual-url">
+            {value().withMessage ? "공유 메시지" : "공유 주소"}
+            <Show
+              when={value().withMessage}
+              fallback={
+                <input
+                  type="url"
+                  readonly
+                  value={value().text}
+                  onFocus={(event) => event.currentTarget.select()}
+                />
+              }
+            >
+              <textarea
+                rows={5}
+                readonly
+                value={value().text}
+                onFocus={(event) => event.currentTarget.select()}
+              />
+            </Show>
+          </label>
+        )}
       </Show>
     </div>
   );
