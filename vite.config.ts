@@ -3,12 +3,17 @@ import { defineConfig } from "vitest/config";
 import type { Plugin } from "vite";
 import solid from "vite-plugin-solid";
 import tailwind from "@tailwindcss/vite";
+import { createGuestbookHandler } from "./server/guestbook/http";
 import { renderPage } from "./server/page";
 // Local dev/preview mirrors the server-rendered metadata returned by the Vercel Function.
 const socialMetadata: Plugin = {
   name: "social-metadata",
   configureServer(server) {
     server.middlewares.use(async (request, response, next) => {
+      if ((request.url ?? "").split("?")[0] === "/api/guestbook") {
+        await createGuestbookHandler()(request, response);
+        return;
+      }
       if (!["/", "/index.html"].includes((request.url ?? "").split("?")[0]))
         return next();
       try {
@@ -29,6 +34,10 @@ const socialMetadata: Plugin = {
   },
   configurePreviewServer(server) {
     server.middlewares.use(async (request, response, next) => {
+      if ((request.url ?? "").split("?")[0] === "/api/guestbook") {
+        await createGuestbookHandler()(request, response);
+        return;
+      }
       if (!["/", "/index.html"].includes((request.url ?? "").split("?")[0]))
         return next();
       try {
