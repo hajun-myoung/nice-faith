@@ -11,6 +11,8 @@ import { useNavigation } from "./navigation";
 import type { Answers, ChoiceIndex } from "../domain/types";
 import { buildFaithReport } from "../domain/scoring";
 import { Brand, Disclaimer } from "../components/ui";
+import GuestbookScreen from "../screens/GuestbookScreen";
+import GuestbookDeleteScreen from "../screens/GuestbookDeleteScreen";
 import LandingScreen from "../screens/LandingScreen";
 import QuestionnaireScreen from "../screens/QuestionnaireScreen";
 import EvaluationScreen from "../screens/EvaluationScreen";
@@ -35,7 +37,10 @@ export default function App() {
         : "NICE FAITH — 당신의 믿음, 몇 점입니까?";
   });
   const report = createMemo(() => buildFaithReport(answers()));
-  const warm = () => route().view === "reflection" || route().view === "reveal";
+  const warm = () =>
+    ["reflection", "reveal", "guestbook", "guestbook-delete"].includes(
+      route().view,
+    );
   const finishReveal = () => navigate("reflection", 1, true);
   const restart = () => {
     setAnswers({});
@@ -104,6 +109,14 @@ export default function App() {
         </Show>
         <main id="main-content" tabIndex={-1}>
           <Switch>
+            <Match when={route().view === "guestbook"}>
+              <GuestbookScreen
+                onBack={() => navigate(report() ? "reflection" : "landing")}
+              />
+            </Match>
+            <Match when={route().view === "guestbook-delete"}>
+              <GuestbookDeleteScreen onBack={() => navigate("guestbook")} />
+            </Match>
             <Match when={route().view === "shared"}>
               <Show when={sharedResult()}>
                 {(result) => (
@@ -115,7 +128,10 @@ export default function App() {
               </Show>
             </Match>
             <Match when={route().view === "landing"}>
-              <LandingScreen onStart={() => navigate("questionnaire")} />
+              <LandingScreen
+                onStart={() => navigate("questionnaire")}
+                onGuestbook={() => navigate("guestbook")}
+              />
             </Match>
             <Match when={route().view === "questionnaire"}>
               <QuestionnaireScreen
@@ -161,6 +177,7 @@ export default function App() {
                 answers={answers()}
                 score={report()?.score}
                 onRestart={restart}
+                onGuestbook={() => navigate("guestbook")}
               />
             </Match>
           </Switch>

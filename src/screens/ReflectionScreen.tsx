@@ -7,6 +7,7 @@ export default function ReflectionScreen(props: {
   answers: Answers;
   score?: number;
   onRestart: () => void;
+  onGuestbook?: () => void;
 }) {
   const copy = () => reflectionFor(props.answers);
   return (
@@ -61,6 +62,16 @@ export default function ReflectionScreen(props: {
             </div>
           )}
         </For>
+      </section>
+      <section class="share-section">
+        <h2>함께 돌아본 우리의 발자취</h2>
+        <button
+          type="button"
+          class="button warm-button"
+          onClick={props.onGuestbook}
+        >
+          마음에 남은 한 문장 남기기
+        </button>
       </section>
       <section class="share-section">
         <h2>나의 결과를 친구와 함께</h2>

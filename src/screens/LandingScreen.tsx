@@ -7,7 +7,10 @@ import {
   Sparkles,
 } from "lucide-solid";
 import { PrimaryButton } from "../components/ui";
-export default function LandingScreen(props: { onStart: () => void }) {
+export default function LandingScreen(props: {
+  onStart: () => void;
+  onGuestbook: () => void;
+}) {
   return (
     <div class="landing">
       <div class="eyebrow">
@@ -81,6 +84,13 @@ export default function LandingScreen(props: { onStart: () => void }) {
           </span>
         </div>
       </div>
+      <button
+        type="button"
+        class="text-button restart"
+        onClick={props.onGuestbook}
+      >
+        함께 돌아본 발자취
+      </button>
     </div>
   );
 }

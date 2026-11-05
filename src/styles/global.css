@@ -1200,3 +1200,28 @@ summary {
   line-height: 1.6;
   resize: vertical;
 }
+
+.guestbook { padding-top: 20px; }
+.guestbook h1 { font-size: 32px; }
+.guestbook h2 { font-size: 17px; }
+.guestbook h3 { font-size: 15px; }
+.guestbook-form, .guestbook-success, .guestbook-list { margin-top: 28px; }
+.guestbook fieldset { border: 0; padding: 0; min-width: 0; }
+.guestbook-field { display: block; margin-top: 20px; font-size: 13px; font-weight: 600; }
+.guestbook input:not([type=checkbox]), .guestbook textarea, .guestbook select {
+  display: block; width: 100%; min-height: 46px; margin-top: 8px; padding: 10px 12px;
+  border: 1px solid #b9b3a7; border-radius: 10px; background: #fff; color: #292720; font: inherit; font-size: 16px;
+}
+.guestbook textarea { resize: vertical; line-height: 1.8; }
+.guestbook [aria-invalid=true] { border-color: #9b2e23; }
+.field-error { color: #9b2e23; font-size: 12px; line-height: 1.8; }
+.guestbook-consent { display: flex; align-items: flex-start; gap: 10px; margin-top: 22px; font-size: 13px; line-height: 1.9; cursor: pointer; }
+.guestbook-consent input { flex-shrink: 0; margin-top: 5px; width: 20px; height: 20px; }
+.guestbook-trap { position: absolute; left: -10000px; width: 1px; height: 1px; overflow: hidden; }
+.guestbook-message { margin-top: 18px; white-space: pre-wrap; overflow-wrap: anywhere; font-size: 14px; line-height: 1.9; }
+.guestbook-entry { margin-top: 16px; }
+.guestbook-entry .button { margin-top: 12px; }
+.guestbook-entry .text-button { margin-top: 8px; }
+.guestbook-success { background: #f4f7ed; }
+.guestbook a { text-decoration: underline; text-underline-offset: 3px; }
+.guestbook button:disabled { opacity: .55; cursor: wait; }

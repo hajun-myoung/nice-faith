@@ -1,6 +1,8 @@
 import { parseSharedResult } from "../domain/sharing";
 import { createSignal, onCleanup } from "solid-js";
 export type View =
+  | "guestbook"
+  | "guestbook-delete"
   | "shared"
   | "landing"
   | "questionnaire"
@@ -13,6 +15,9 @@ export interface Route {
   question: number;
 }
 export function parseRoute(hash: string, search = ""): Route {
+  if (hash.startsWith("#/guestbook/delete"))
+    return { view: "guestbook-delete", question: 1 };
+  if (hash === "#/guestbook") return { view: "guestbook", question: 1 };
   if (parseSharedResult(search)) return { view: "shared", question: 1 };
   const match = /^#\/questions\/(\d+)$/.exec(hash);
   if (match)
@@ -32,7 +37,19 @@ export function useNavigation() {
   const [route, setRoute] = createSignal(
     parseRoute(location.hash, location.search),
   );
-  const sync = () => setRoute(parseRoute(location.hash, location.search));
+  let currentUrl = location.href;
+  const mayLeave = () =>
+    window.dispatchEvent(
+      new Event("nice-faith:before-navigate", { cancelable: true }),
+    );
+  const sync = () => {
+    if (currentUrl !== location.href && !mayLeave()) {
+      history.pushState(null, "", currentUrl);
+      return;
+    }
+    currentUrl = location.href;
+    setRoute(parseRoute(location.hash, location.search));
+  };
   window.addEventListener("popstate", sync);
   window.addEventListener("hashchange", sync);
   onCleanup(() => {
@@ -40,6 +57,7 @@ export function useNavigation() {
     window.removeEventListener("hashchange", sync);
   });
   const navigate = (view: View, question = 1, replace = false) => {
+    if (!mayLeave()) return;
     const hash =
       view === "landing"
         ? "#/"
@@ -52,6 +70,7 @@ export function useNavigation() {
       "",
       `${location.pathname}${hash}`,
     );
+    currentUrl = location.href;
     setRoute({ view, question });
   };
   return { route, navigate };
