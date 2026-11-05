@@ -2,3 +2,13 @@ node_modules/
 dist/
 work/
 .DS_Store
+
+.env*
+!.env.example
+.firebase/
+*-debug.log
+*-debug.*.log
+
+*.json
+!firebase.json
+!firestore.indexes.json

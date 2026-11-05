@@ -1,0 +1,25 @@
+{
+  "indexes": [
+    {
+      "collectionGroup": "guestbookEntries",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "status", "order": "ASCENDING" },
+        { "fieldPath": "createdAt", "order": "DESCENDING" },
+        { "fieldPath": "__name__", "order": "DESCENDING" }
+      ]
+    }
+  ],
+  "fieldOverrides": [
+    {
+      "collectionGroup": "guestbookEntries",
+      "fieldPath": "message",
+      "indexes": []
+    },
+    {
+      "collectionGroup": "guestbookEntries",
+      "fieldPath": "deleteTokenHash",
+      "indexes": []
+    }
+  ]
+}
