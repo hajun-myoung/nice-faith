@@ -19,7 +19,7 @@ import {
   type PublicEntry,
   type ReportReason,
   reportReasons,
-} from "../../src/domain/guestbook";
+} from "../../src/domain/guestbook.js";
 
 const DAY = 86_400_000;
 const WINDOW = 600_000;

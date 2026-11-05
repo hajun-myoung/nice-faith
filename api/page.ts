@@ -1,7 +1,7 @@
 import { readFile } from "node:fs/promises";
 import { join } from "node:path";
 import type { IncomingMessage, ServerResponse } from "node:http";
-import { renderPage } from "../server/page";
+import { renderPage } from "../server/page.js";
 let template: Promise<string> | undefined;
 export default async function handler(
   request: IncomingMessage,

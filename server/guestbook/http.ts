@@ -1,11 +1,11 @@
 import type { IncomingMessage, ServerResponse } from "node:http";
-import { guestbookDatabase } from "./firebase";
+import { guestbookDatabase } from "./firebase.js";
 import {
   GuestbookError,
   GuestbookService,
   newIdentity,
   secureEqual,
-} from "./service";
+} from "./service.js";
 
 export type ApiRequest = IncomingMessage & { body?: unknown };
 function service() {

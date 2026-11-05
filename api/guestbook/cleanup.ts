@@ -1,2 +1,2 @@
-import { createGuestbookHandler } from "../../server/guestbook/http";
+import { createGuestbookHandler } from "../../server/guestbook/http.js";
 export default createGuestbookHandler(undefined, true);
